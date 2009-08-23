@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="java-zipper" basedir="." default="jars">
+
+    <property name="jdk" value="1.5"/>
+    <property name="debuglevel" value="source,lines"/>
+    <property name="junit" value="junit"/>
+
+    <path id="classpath">
+        <pathelement location="bin"/>
+        <pathelement location="lib/junit-4.7.jar"/>
+    </path>
+
+	<target name="clean">
+        <delete dir="bin"/>
+        <delete dir="${junit}"/>
+	</target>
+
+    <target name="init" depends="clean">
+        <mkdir dir="bin"/>
+    </target>
+
+    <target name="build-zipper" depends="init">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${jdk}" target="${jdk}">
+			<classpath refid="classpath"/>
+            <src path="src"/>
+        </javac>
+	</target>
+
+    <target name="build-test" depends="build-zipper">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${jdk}" target="${jdk}">
+			<classpath refid="classpath"/>
+            <src path="test"/>
+        </javac>
+	</target>
+
+    <target name="jars" depends="build-zipper">
+		<jar destfile="zipper.jar" basedir="bin">
+			<manifest>
+				<attribute name="Version" value="0.1"/>
+			</manifest>
+		</jar>
+		<jar destfile="zipper-src.jar" basedir="src"/>
+	</target>
+
+	<target name="build" depends="build-zipper"/>
+
+	<target name="build-all" depends="build-test"/>
+
+    <target name="test" depends="build-test">
+        <mkdir dir="${junit}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <classpath refid="classpath"/>
+            <test name="com.mu.zipper.ZipperTest" todir="${junit}"/>
+        </junit>
+    </target>
+
+    <target name="test.report">
+        <junitreport todir="${junit}">
+            <fileset dir="${junit}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${junit}"/>
+        </junitreport>
+    </target>
+
+</project>
+
