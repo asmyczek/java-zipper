@@ -217,6 +217,24 @@ public final class Loc<T extends IZipNode> {
 		throw new ZipperException("Current node is the most right node!");
 	}
 	
+	@SuppressWarnings("unchecked")
+	public Loc<T> replace(IZipNode node) {
+		ZipNode<T> zipNode = null;
+		if (node instanceof ZipNode<?>) {
+			zipNode = (ZipNode<T>)node;
+		} else {
+			zipNode = new ZipNode(node, node.getChildren());
+		}
+		return new Loc<T>(zipNode, context.copy());
+	}
+	
+	public Loc<T> replaceNode(T node) {
+		if (node instanceof ZipNode<?>) {
+			throw new IllegalArgumentException("ZipNode not supported!");
+		}
+		return new Loc<T>(this.node.replaceNode(node), context.copy());
+	}
+	
 	// **** Path ****
 	
 	public Path[] path() {
@@ -252,8 +270,8 @@ public final class Loc<T extends IZipNode> {
 	
 	@SuppressWarnings("unchecked")
 	private ZipNode<T> toZipNode(final IZipNode node) {
-		if (node instanceof ZipNode) {
-			return (ZipNode<T>)node;
+		if (node instanceof ZipNode<?>) {
+			return (ZipNode<T>) node;
 		} else {
 			return new ZipNode<T>((T)node, node.getChildren());
 		}

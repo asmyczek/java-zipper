@@ -2,6 +2,7 @@ package com.mu.zipper;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -146,6 +147,45 @@ public class ZipperTest extends TestCase {
 		}
 	}
 	
+	@Test
+	public void testReplace() {
+		Loc<Node> a2 = root.next().right();
+		
+		Node repWith1 = new Node("r1", new Node("r11"), new Node("r12"));
+		Loc<Node> rep1 = a2.replace(repWith1);
+		
+		assertEquals(3, rep1.root().node().getChildren().size());
+		assertEquals("r1", nodeName(rep1));
+		assertEquals(2, rep1.node().getChildren().size());
+		assertEquals("r11", nodeName(rep1.down()));
+		assertEquals("r12", nodeName(rep1.down().next()));
+		
+		Loc<Node> repWith2 = root.next();
+		Loc<Node> rep2 = a2.replace(repWith2.node());
+		assertEquals("a1", nodeName(rep2));
+		assertEquals(2, rep2.node().getChildren().size());
+		assertEquals("b1", nodeName(rep2.down()));
+		assertEquals("b2", nodeName(rep2.down().next()));
+	}
+	
+	@Test
+	public void testUnzip() {
+		Loc<Node> a2 = root.next().right();
+		Loc<Node> insL = a2.insertLeft(new Node("l1", false));
+		Loc<Node> add = insL.left().add(new Node("d1"), new Node("d2"));
+		
+		Node u = Zipper.<Node>unzip(add.root());
+		assertEquals(4, u.getChildren().size());
+		Iterator<Node> l1i = u.getChildren().iterator();
+		l1i.next();
+		Node l1 = l1i.next();
+		assertEquals("l1", l1.getName());
+		assertEquals(2, l1.getChildren().size());
+		Iterator<Node> di = l1.getChildren().iterator();
+		assertEquals("d1", di.next().getName());
+		assertEquals("d2", di.next().getName());
+	}
+	
 	/**
 	 * @param loc
 	 * @return name for the param location
@@ -180,28 +220,28 @@ public class ZipperTest extends TestCase {
 	class Node implements IZipNode {
 
 		private String name;
-		private final List<IZipNode> children;
+		private final List<Node> children;
 
 		public Node(final String name) {
-			this(name, (IZipNode[])null);
+			this(name, (Node[])null);
 		}
 		
 		public Node(final String name, final boolean leaf) {
-			this(name, (leaf)? (IZipNode[])null : new IZipNode[0]);
+			this(name, (leaf)? (Node[])null : new Node[0]);
 		}
 		
-		public Node(final String name, final IZipNode... children) {
+		public Node(final String name, final Node... children) {
 			super();
 			assert(name != null);
 			this.name = name;
-			this.children = (children == null)? null : new LinkedList<IZipNode>(Arrays.asList(children));
+			this.children = (children == null)? null : new LinkedList<Node>(Arrays.asList(children));
 		}
 		
 		public String getName() {
 			return name;
 		}
 
-		public Collection<IZipNode> getChildren() {
+		public Collection<Node> getChildren() {
 			return this.children;
 		}
 

@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 public class Context {
 
-	protected static final Context TOP = new Context((ZipNode)null, null, null);
+	protected static final Context TOP = new Context((ZipNode<?>)null, null, null);
 	
 	private final Collection<IZipNode> left;
 	
@@ -14,10 +14,10 @@ public class Context {
 	
 	private final Context parentContext;
 	
-	private final ZipNode parentNode;
+	private final ZipNode<?> parentNode;
 	
 	protected Context(
-			final ZipNode parentNode, 
+			final ZipNode<?> parentNode, 
 			final Context parentContext, 
 			final Collection<IZipNode> children) {
 		this(parentNode, 
@@ -28,7 +28,7 @@ public class Context {
 	}
 	
 	protected Context(
-			final ZipNode parentNode, 
+			final ZipNode<?> parentNode, 
 			final Context parentContext, 
 			final LinkedList<IZipNode> left, 
 			final LinkedList<IZipNode> right) {
@@ -59,12 +59,18 @@ public class Context {
 		return right;
 	}
 
-	public Context getParentContext() {
+	protected Context getParentContext() {
 		return parentContext;
 	}
 
-	public ZipNode getParentNode() {
+	protected ZipNode<?> getParentNode() {
 		return parentNode;
 	}
 	
+	protected Context copy() {
+		LinkedList<IZipNode> left = new LinkedList<IZipNode>(leftNodes());
+		LinkedList<IZipNode> right = new LinkedList<IZipNode>(rightNodes());
+		return new Context(getParentNode(), getParentContext(), left, right);
+	}
+
 }

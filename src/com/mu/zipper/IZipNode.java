@@ -12,6 +12,6 @@ public interface IZipNode {
 	 * @return a collection if this component is a node
 	 * or null if it is a leaf.
 	 */
-	abstract public Collection<IZipNode> getChildren();
+	abstract public Collection<? extends IZipNode> getChildren();
 	
 }
