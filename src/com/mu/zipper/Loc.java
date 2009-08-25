@@ -68,9 +68,11 @@ public final class Loc<T extends IZipNode> {
 	
 	public Loc<T> down() {
 		if (hasChildren()) {
-			LinkedList<IZipNode> children = new LinkedList<IZipNode>(node.getChildren());
-			IZipNode first = children.removeFirst();
-			return new Loc<T>(toZipNode(first), new Context(node, context, children));
+			int length = node.getChildren().size();
+			IZipNode[] ch = node.getChildren().<IZipNode>toArray(new IZipNode[length]);
+			IZipNode[] r = new IZipNode[length - 1];
+        	System.arraycopy(ch, 1, r, 0, length - 1);
+			return new Loc<T>(toZipNode(ch[0]), new Context(node, context, new IZipNode[0], r));
 		}
 		throw new ZipperException("Current node does not have any children!");
 	}
@@ -79,9 +81,9 @@ public final class Loc<T extends IZipNode> {
 	public Loc<T> up() {
 		if (!isTop()) {
 			LinkedList<IZipNode> children = new LinkedList<IZipNode>();
-			children.addAll(context.leftNodes());
+			children.addAll(Arrays.asList(context.leftNodes()));
 			children.add(node);
-			children.addAll(context.rightNodes());
+			children.addAll(Arrays.asList(context.rightNodes()));
 			return new Loc<T>(new ZipNode<T>((T)context.getParentNode()._node(), children), context.getParentContext());
 		}
 		throw new ZipperException("Current node is already the top node!");
@@ -90,11 +92,15 @@ public final class Loc<T extends IZipNode> {
 	
 	public Loc<T> right() {
 		if (!isLast()) {
-			LinkedList<IZipNode> left = new LinkedList<IZipNode>(context.leftNodes());
-			left.addLast(node);
-			LinkedList<IZipNode> right = new LinkedList<IZipNode>(context.rightNodes());
+			IZipNode[] left = new IZipNode[context.leftNodes().length + 1];
+        	System.arraycopy(context.leftNodes(), 0, left, 0, context.leftNodes().length);
+        	left[left.length-1] = node;
+        	
+			IZipNode[] right = new IZipNode[context.rightNodes().length - 1];
+        	System.arraycopy(context.rightNodes(), 1, right, 0, context.rightNodes().length - 1);
+        	
 			Context ctx = new Context(context.getParentNode(), context.getParentContext(), left, right);
-			return new Loc<T>(toZipNode(right.removeFirst()), ctx);
+			return new Loc<T>(toZipNode(context.rightNodes()[0]), ctx);
 		}
 		throw new ZipperException("Current node is already the the most right node!");
 	}
@@ -102,11 +108,14 @@ public final class Loc<T extends IZipNode> {
 	
 	public Loc<T> left() {
 		if (!isFirst()) {
-			LinkedList<IZipNode> left = new LinkedList<IZipNode>(context.leftNodes());
-			LinkedList<IZipNode> right = new LinkedList<IZipNode>(context.rightNodes());
-			right.addFirst(node);
+			IZipNode[] left = new IZipNode[context.leftNodes().length - 1];
+        	System.arraycopy(context.leftNodes(), 0, left, 0, context.leftNodes().length - 1);
+        	
+        	IZipNode[] right = new IZipNode[context.rightNodes().length + 1];
+        	System.arraycopy(context.rightNodes(), 0, right, 1, context.rightNodes().length);
+        	right[0] = node;
 			Context ctx = new Context(context.getParentNode(), context.getParentContext(), left, right);
-			return new Loc<T>(toZipNode(left.removeLast()), ctx);
+			return new Loc<T>(toZipNode(context.leftNodes()[left.length]), ctx);
 		}
 		throw new ZipperException("Current node is already the the most left node!");
 	}
@@ -176,30 +185,37 @@ public final class Loc<T extends IZipNode> {
 	}
 	
 	public Loc<T> insertLeft(T... nodes) {
-		LinkedList<IZipNode> left = new LinkedList<IZipNode>(context.leftNodes());
-		LinkedList<IZipNode> right = new LinkedList<IZipNode>(context.rightNodes());
-		for (T n : nodes) {
-			left.addLast(n);
-		}
+		IZipNode[] left = new IZipNode[context.leftNodes().length + nodes.length];
+		System.arraycopy(context.leftNodes(), 0, left, 0, context.leftNodes().length);
+		System.arraycopy(nodes, 0, left, context.leftNodes().length, nodes.length);
+		
+		IZipNode[] right = new IZipNode[context.rightNodes().length];
+		System.arraycopy(context.rightNodes(), 0, right, 0, context.rightNodes().length);
+		
 		Context ctx = new Context(context.getParentNode(), context.getParentContext(), left, right);
 		return new Loc<T>(node, ctx);
 	}
 	
 	public Loc<T> insertRight(T... nodes) {
-		LinkedList<IZipNode> left = new LinkedList<IZipNode>(context.leftNodes());
-		LinkedList<IZipNode> right = new LinkedList<IZipNode>(context.rightNodes());
-		for (int i = nodes.length - 1; i >= 0; i--) {
-			right.addFirst(nodes[i]);
-		}
+		IZipNode[] left = new IZipNode[context.leftNodes().length];
+		System.arraycopy(context.leftNodes(), 0, left, 0, context.leftNodes().length);
+		
+		IZipNode[] right = new IZipNode[context.rightNodes().length + nodes.length];
+		System.arraycopy(nodes, 0, right, 0, nodes.length);
+		System.arraycopy(context.rightNodes(), 0, right, nodes.length, context.rightNodes().length);
+		
 		Context ctx = new Context(context.getParentNode(), context.getParentContext(), left, right);
 		return new Loc<T>(node, ctx);
 	}
 	
 	public Loc<T> removeLeft() {
 		if (!isFirst()) {
-    		LinkedList<IZipNode> left = new LinkedList<IZipNode>(context.leftNodes());
-    		LinkedList<IZipNode> right = new LinkedList<IZipNode>(context.rightNodes());
-    		left.removeLast();
+    		IZipNode[] left = new IZipNode[context.leftNodes().length - 1];
+    		System.arraycopy(context.leftNodes(), 0, left, 0, context.leftNodes().length - 1);
+			
+    		IZipNode[] right = new IZipNode[context.rightNodes().length];
+    		System.arraycopy(context.rightNodes(), 0, right, 0, context.rightNodes().length);
+			
     		Context ctx = new Context(context.getParentNode(), context.getParentContext(), left, right);
     		return new Loc<T>(node, ctx);
 		}
@@ -208,9 +224,12 @@ public final class Loc<T extends IZipNode> {
 	
 	public Loc<T> removeRight() {
 		if (!isFirst()) {
-    		LinkedList<IZipNode> left = new LinkedList<IZipNode>(context.leftNodes());
-    		LinkedList<IZipNode> right = new LinkedList<IZipNode>(context.rightNodes());
-    		right.removeFirst();
+    		IZipNode[] left = new IZipNode[context.leftNodes().length];
+    		System.arraycopy(context.leftNodes(), 0, left, 0, context.leftNodes().length);
+			
+    		IZipNode[] right = new IZipNode[context.rightNodes().length - 1];
+    		System.arraycopy(context.rightNodes(), 1, right, 0, context.rightNodes().length - 1);
+    		
     		Context ctx = new Context(context.getParentNode(), context.getParentContext(), left, right);
     		return new Loc<T>(node, ctx);
 		}

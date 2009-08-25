@@ -1,16 +1,13 @@
 package com.mu.zipper;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 
 public class Context {
 
-	protected static final Context TOP = new Context((ZipNode<?>)null, null, null);
+	protected static final Context TOP = new Context(null, null, null, null);
 	
-	private final Collection<IZipNode> left;
+	private final IZipNode[] left;
 	
-	private final Collection<IZipNode> right;
+	private final IZipNode[] right;
 	
 	private final Context parentContext;
 	
@@ -19,24 +16,13 @@ public class Context {
 	protected Context(
 			final ZipNode<?> parentNode, 
 			final Context parentContext, 
-			final Collection<IZipNode> children) {
-		this(parentNode, 
-				parentContext, 
-				new LinkedList<IZipNode>(), 
-				(children == null)? new LinkedList<IZipNode>() : 
-					new LinkedList<IZipNode>(children));
-	}
-	
-	protected Context(
-			final ZipNode<?> parentNode, 
-			final Context parentContext, 
-			final LinkedList<IZipNode> left, 
-			final LinkedList<IZipNode> right) {
+			final IZipNode[] left, 
+			final IZipNode[] right) {
 		super();
 		this.parentNode = parentNode;
 		this.parentContext = parentContext;
-		this.left = Collections.unmodifiableList(left);
-		this.right = Collections.unmodifiableList(right);
+		this.left = (left == null)? new IZipNode[0] : left;
+		this.right = (right == null)? new IZipNode[0] : right;
 	}
 	
 	protected boolean isTop() {
@@ -44,18 +30,18 @@ public class Context {
 	}
 	
 	protected boolean isFirst() {
-		return left.isEmpty();
+		return left.length == 0;
 	}
 	
 	protected boolean isLast() {
-		return right.isEmpty();
+		return right.length == 0;
 	}
 	
-	protected Collection<IZipNode> leftNodes() {
+	protected IZipNode[] leftNodes() {
 		return left;
 	}
 	
-	protected Collection<IZipNode> rightNodes() {
+	protected IZipNode[] rightNodes() {
 		return right;
 	}
 
@@ -68,9 +54,11 @@ public class Context {
 	}
 	
 	protected Context copy() {
-		LinkedList<IZipNode> left = new LinkedList<IZipNode>(leftNodes());
-		LinkedList<IZipNode> right = new LinkedList<IZipNode>(rightNodes());
-		return new Context(getParentNode(), getParentContext(), left, right);
+		IZipNode[] l = new IZipNode[left.length];
+    	System.arraycopy(left, 0, l, 0, left.length);
+		IZipNode[] r = new IZipNode[right.length];
+    	System.arraycopy(right, 0, r, 0, right.length);
+		return new Context(parentNode, parentContext, l, r);
 	}
 
 }

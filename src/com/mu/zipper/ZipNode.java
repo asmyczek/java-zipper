@@ -1,8 +1,8 @@
 package com.mu.zipper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 
 public final class ZipNode<T extends IZipNode> implements IZipNode {
 
@@ -42,7 +42,7 @@ public final class ZipNode<T extends IZipNode> implements IZipNode {
 	
 	private Collection<IZipNode> newList(final Collection<? extends IZipNode> children) {
 		return (children == null)? null : 
-			Collections.unmodifiableCollection(new LinkedList<IZipNode>(children));
+			Collections.unmodifiableCollection(new ArrayList<IZipNode>(children));
 	}
 
 	@Override
