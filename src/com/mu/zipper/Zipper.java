@@ -26,9 +26,10 @@ public final class Zipper {
 			ZipNode<T> zipNode = (ZipNode<T>)node;
 			T source = zipNode._node();
 			if (!zipNode.isLeaf()) {
+				Collection<T> ch = (Collection<T>)source.getChildren();
 				source.getChildren().clear();
-    			for (IZipNode n : node.getChildren()) {
-    				((Collection<T>)source.getChildren()).add((T) unzip(n));
+    			for (IZipNode n : zipNode.children()) {
+    				ch.add((T)unzip(n));
     			}
 			}
 			return source;

@@ -1,8 +1,6 @@
 package com.mu.zipper;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 
 public final class Loc<T extends IZipNode> {
@@ -68,11 +66,10 @@ public final class Loc<T extends IZipNode> {
 	
 	public Loc<T> down() {
 		if (hasChildren()) {
-			int length = node.getChildren().size();
-			IZipNode[] ch = node.getChildren().<IZipNode>toArray(new IZipNode[length]);
+			int length = node.children().length;
 			IZipNode[] r = new IZipNode[length - 1];
-        	System.arraycopy(ch, 1, r, 0, length - 1);
-			return new Loc<T>(toZipNode(ch[0]), new Context(node, context, new IZipNode[0], r));
+        	System.arraycopy(node.children(), 1, r, 0, length - 1);
+			return new Loc<T>(toZipNode(node.children()[0]), new Context(node, context, new IZipNode[0], r));
 		}
 		throw new ZipperException("Current node does not have any children!");
 	}
@@ -80,11 +77,13 @@ public final class Loc<T extends IZipNode> {
 	@SuppressWarnings("unchecked")
 	public Loc<T> up() {
 		if (!isTop()) {
-			LinkedList<IZipNode> children = new LinkedList<IZipNode>();
-			children.addAll(Arrays.asList(context.leftNodes()));
-			children.add(node);
-			children.addAll(Arrays.asList(context.rightNodes()));
-			return new Loc<T>(new ZipNode<T>((T)context.getParentNode()._node(), children), context.getParentContext());
+			IZipNode[] ch = new IZipNode[1+
+			                             context.leftNodes().length +
+			                             context.rightNodes().length];
+			System.arraycopy(context.leftNodes(), 0, ch, 0, context.leftNodes().length);
+			ch[context.leftNodes().length] = node;
+			System.arraycopy(context.rightNodes(), 0, ch, context.leftNodes().length + 1, context.rightNodes().length);
+			return new Loc<T>(new ZipNode<T>((T)context.getParentNode()._node(), ch), context.getParentContext());
 		}
 		throw new ZipperException("Current node is already the top node!");
 	}
@@ -164,22 +163,24 @@ public final class Loc<T extends IZipNode> {
 	
 	// **** Mutations ****
 	
-	public Loc<T> add(final T... nodes) {
-		return addAll(Arrays.<T>asList(nodes));
+	@SuppressWarnings("unchecked")
+	public Loc<T> addAll(final Collection<T> nodes) {
+		return add((T[]) nodes.toArray());
 	}
 	
-	public Loc<T> addAll(final Collection<T> nodes) {
+	public Loc<T> add(final T... nodes) {
 		if (!isLeaf()) {
-    		LinkedList<IZipNode> children = new LinkedList<IZipNode>(node.getChildren());
-    		children.addAll(nodes);
-    		return new Loc<T>(new ZipNode<T>(node._node(), children), context);
+			IZipNode[] ch = new IZipNode[nodes.length + node.children().length];
+			System.arraycopy(node.children(), 0, ch, 0, node.children().length);
+			System.arraycopy(nodes, 0, ch, node.children().length, nodes.length);
+    		return new Loc<T>(new ZipNode<T>(node._node(), ch), context);
 		}
 		throw new ZipperException("Current node is a leaf!");
 	}
 	
 	public Loc<T> clear() {
 		if (!isLeaf()) {
-    		return new Loc<T>(new ZipNode<T>(node._node(), Collections.<IZipNode>emptyList()), context);
+    		return new Loc<T>(new ZipNode<T>(node._node(), new IZipNode[0]), context);
 		}
 		throw new ZipperException("Current node is a leaf!");
 	}
@@ -236,15 +237,8 @@ public final class Loc<T extends IZipNode> {
 		throw new ZipperException("Current node is the most right node!");
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Loc<T> replace(IZipNode node) {
-		ZipNode<T> zipNode = null;
-		if (node instanceof ZipNode<?>) {
-			zipNode = (ZipNode<T>)node;
-		} else {
-			zipNode = new ZipNode(node, node.getChildren());
-		}
-		return new Loc<T>(zipNode, context.copy());
+		return new Loc<T>(toZipNode(node), context.copy());
 	}
 	
 	public Loc<T> replaceNode(T node) {

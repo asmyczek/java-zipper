@@ -1,9 +1,9 @@
 package com.mu.zipper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -234,7 +234,7 @@ public class ZipperTest extends TestCase {
 			super();
 			assert(name != null);
 			this.name = name;
-			this.children = (children == null)? null : new LinkedList<Node>(Arrays.asList(children));
+			this.children = (children == null)? null : new ArrayList<Node>(Arrays.asList(children));
 		}
 		
 		public String getName() {
