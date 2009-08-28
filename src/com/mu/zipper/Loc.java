@@ -333,7 +333,7 @@ public final class Loc<T extends IZipNode> {
 		if (node instanceof ZipNode<?>) {
 			return (ZipNode<T>) node;
 		} else {
-			return new ZipNode<T>((T)node, node.getChildren());
+			return new ZipNode<T>((T)node);
 		}
 	}
 	

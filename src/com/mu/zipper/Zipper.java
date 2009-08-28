@@ -12,7 +12,7 @@ public final class Zipper {
 	 * @return zipper root location
 	 */
 	public static <T extends IZipNode> Loc<T> newZipper(final T node) {
-		return new Loc<T>(new ZipNode<T>(node, node.getChildren()), Context.TOP);
+		return new Loc<T>(new ZipNode<T>(node), Context.TOP);
 	}
 
 	public static <T extends IZipNode> Loc<T> unfold(final Loc<T> node) {
