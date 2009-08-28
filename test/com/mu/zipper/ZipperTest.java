@@ -51,6 +51,10 @@ public class ZipperTest extends TestCase {
 		assertEquals("a3", nodeName(root.next().rightMost()));
 		assertEquals("a1", nodeName(root.next().right().leftMost()));
 		
+		assertEquals("a1", nodeName(root.down(0)));
+		assertEquals("a2", nodeName(root.down(1)));
+		assertEquals("a3", nodeName(root.down(2)));
+		
 		Loc<Node> a2 = root.down().right();
 		assertEquals("c1", nodeName(a2.down()));
 		assertEquals("a3", nodeName(a2.right()));
@@ -86,15 +90,21 @@ public class ZipperTest extends TestCase {
 	@Test
 	public void testRemoveChildren() {
 		Loc<Node> a1 = root.next();
-		Loc<Node> rem = a1.clear();
+		Loc<Node> rem1 = a1.clear();
 		
 		assertEquals(2, a1.node().getChildren().size());
-		assertEquals(0, rem.node().getChildren().size());
+		assertEquals(0, rem1.node().getChildren().size());
+		
+		Loc<Node> a2 = root.down(1);
+		Loc<Node> rem2 = a2.removeChild(1);
+		assertEquals(2, a2.node().getChildren().size());
+		assertEquals(1, rem2.node().getChildren().size());
+		assertEquals("c1", nodeName(rem2.next()));
 	}
 	
 	@Test
 	public void testInsert() {
-		Loc<Node> a2 = root.next().right();
+		Loc<Node> a2 = root.down(1);
 
 		Loc<Node> insL = a2.insertLeft(new Node("l1"), new Node("l2"));
 		assertEquals(3, root.node().getChildren().size());
@@ -108,6 +118,22 @@ public class ZipperTest extends TestCase {
 		assertEquals("r1", nodeName(insR.right()));
 		assertEquals("r2", nodeName(insR.right().right()));
 		
+	}
+	
+	@Test
+	public void testRemove() {
+		Loc<Node> c1 = root.down(1).down();
+		Loc<Node> rem1 = c1.remove();
+		
+		assertEquals("a2", nodeName(rem1));
+		assertEquals(2, c1.up().node().getChildren().size());
+		assertEquals(1, rem1.node().getChildren().size());
+		
+		Loc<Node> rem2 = rem1.remove();
+		
+		assertEquals("root", nodeName(rem2));
+		assertEquals(3, c1.up().up().node().getChildren().size());
+		assertEquals(2, rem2.node().getChildren().size());
 	}
 	
 	@Test
@@ -145,6 +171,18 @@ public class ZipperTest extends TestCase {
 		for (int i = 0; i < path.length; i++) {
 			assertEquals(path[i], rpath[i]);
 		}
+		
+		Loc<Node> c2 = root.location(path);
+		Collection<ZipNode<Node>> nodePath = c2.nodePath();
+		assertEquals(3, nodePath.size());
+		Iterator<ZipNode<Node>> iter = nodePath.iterator();
+		ZipNode<Node> next = iter.next();
+		assertEquals("root", next.toString());
+		next = iter.next();
+		assertEquals("a2", next.toString());
+		next = iter.next();
+		assertEquals("c1", next.toString());
+		
 	}
 	
 	@Test

@@ -15,6 +15,14 @@ public final class Zipper {
 		return new Loc<T>(new ZipNode<T>(node, node.getChildren()), Context.TOP);
 	}
 
+	public static <T extends IZipNode> Loc<T> unfold(final Loc<T> node) {
+		Loc<T> l = node.root();
+		while (!l.isEnd()) {
+			l = l.next();
+		}
+		return l.root();
+	}
+	
 	/**
 	 * @param <T>
 	 * @param node

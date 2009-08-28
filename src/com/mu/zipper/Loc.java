@@ -1,7 +1,10 @@
 package com.mu.zipper;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 public final class Loc<T extends IZipNode> {
 
@@ -65,13 +68,18 @@ public final class Loc<T extends IZipNode> {
 	// **** Traversing the zipper ****
 	
 	public Loc<T> down() {
-		if (hasChildren()) {
-			int length = node.children().length;
-			IZipNode[] r = new IZipNode[length - 1];
-        	System.arraycopy(node.children(), 1, r, 0, length - 1);
-			return new Loc<T>(toZipNode(node.children()[0]), new Context(node, context, new IZipNode[0], r));
+		return down(0);
+	}
+	
+	public Loc<T> down(int index) {
+		if (hasChildren() && index < node.children().length) {
+			IZipNode[] left = new IZipNode[index];
+			System.arraycopy(node.children(), 0, left, 0, left.length);
+			IZipNode[] right = new IZipNode[node.children().length - index - 1];
+			System.arraycopy(node.children(), index + 1, right, 0, right.length);
+			return new Loc<T>(toZipNode(node.children()[index]), new Context(node, context, left, right));
 		}
-		throw new ZipperException("Current node does not have any children!");
+		throw new ZipperException("Current node does not have any children or index out of bound!");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -178,6 +186,16 @@ public final class Loc<T extends IZipNode> {
 		throw new ZipperException("Current node is a leaf!");
 	}
 	
+	public Loc<T> removeChild(int index) {
+		if (hasChildren() && index < node.getChildren().size()) {
+			IZipNode[] ch = new IZipNode[node.children().length - 1];
+			System.arraycopy(node.children(), 0, ch, 0, index);
+			System.arraycopy(node.children(), index + 1, ch, index, node.children().length - index - 1);
+    		return new Loc<T>(new ZipNode<T>(node._node(), ch), context);
+		}
+		throw new ZipperException("Current node does not have any children or index out of bound!");
+	}
+	
 	public Loc<T> clear() {
 		if (!isLeaf()) {
     		return new Loc<T>(new ZipNode<T>(node._node(), new IZipNode[0]), context);
@@ -207,6 +225,22 @@ public final class Loc<T extends IZipNode> {
 		
 		Context ctx = new Context(context.getParentNode(), context.getParentContext(), left, right);
 		return new Loc<T>(node, ctx);
+	}
+	
+	/**
+	 * Remove current node, returns parent location
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Loc<T> remove() {
+		if (!isTop()) {
+			IZipNode[] ch = new IZipNode[context.leftNodes().length +
+			                             context.rightNodes().length];
+			System.arraycopy(context.leftNodes(), 0, ch, 0, context.leftNodes().length);
+			System.arraycopy(context.rightNodes(), 0, ch, context.leftNodes().length, context.rightNodes().length);
+			return new Loc<T>(new ZipNode<T>((T)context.getParentNode()._node(), ch), context.getParentContext());
+		}
+		throw new ZipperException("Current node is already the top node!");
 	}
 	
 	public Loc<T> removeLeft() {
@@ -280,6 +314,19 @@ public final class Loc<T extends IZipNode> {
 		}
 		return l;
 	}
+	
+	public Collection<ZipNode<T>> nodePath() {
+		List<ZipNode<T>> path = new ArrayList<ZipNode<T>>();
+		Loc<T> l = this;
+		while (!l.isTop()) {
+			path.add(0, l.node());
+			l = l.up();
+		}
+		path.add(0, l.node());
+		return Collections.unmodifiableList(path);
+	}
+	
+	// ****
 	
 	@SuppressWarnings("unchecked")
 	private ZipNode<T> toZipNode(final IZipNode node) {
