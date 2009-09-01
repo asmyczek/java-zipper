@@ -229,7 +229,7 @@ public class ZipperTest extends TestCase {
 	 * @return name for the param location
 	 */
 	private String nodeName(final Loc<Node> loc) {
-		return loc.node()._node().getName();
+		return loc._source().getName();
 	}
 	
 	/**

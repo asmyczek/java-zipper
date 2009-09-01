@@ -3,14 +3,17 @@ package com.mu.zipper;
 import java.util.Collection;
 
 /**
- * Base component interface for all zippable classes.
+ * The only hook to the Zipper data structure.
+ * All nodes handlen by the Zipper have 
+ * to implement this interface.
+ *
  * @author asmyczek
  */
 public interface IZipNode {
 
 	/**
-	 * @return a collection if this component is a node
-	 * or null if it is a leaf.
+	 * @return null if this node is a leaf node, otherwise
+	 * return a collection, empty or not.
 	 */
 	abstract public Collection<? extends IZipNode> getChildren();
 	

@@ -27,6 +27,10 @@ public final class Loc<T extends IZipNode> {
 		return node;
 	}
 	
+	public T _source() {
+		return node._source();
+	}
+	
 	// **** Orientation in zipper ****
 	
 	public boolean isTop() {
@@ -91,7 +95,7 @@ public final class Loc<T extends IZipNode> {
 			System.arraycopy(context.leftNodes(), 0, ch, 0, context.leftNodes().length);
 			ch[context.leftNodes().length] = node;
 			System.arraycopy(context.rightNodes(), 0, ch, context.leftNodes().length + 1, context.rightNodes().length);
-			return new Loc<T>(new ZipNode<T>((T)context.getParentNode()._node(), ch), context.getParentContext());
+			return new Loc<T>(new ZipNode<T>((T)context.getParentNode()._source(), ch), context.getParentContext());
 		}
 		throw new ZipperException("Current node is already the top node!");
 	}
@@ -181,7 +185,7 @@ public final class Loc<T extends IZipNode> {
 			IZipNode[] ch = new IZipNode[nodes.length + node.children().length];
 			System.arraycopy(node.children(), 0, ch, 0, node.children().length);
 			System.arraycopy(nodes, 0, ch, node.children().length, nodes.length);
-    		return new Loc<T>(new ZipNode<T>(node._node(), ch), context);
+    		return new Loc<T>(new ZipNode<T>(_source(), ch), context);
 		}
 		throw new ZipperException("Current node is a leaf!");
 	}
@@ -191,14 +195,14 @@ public final class Loc<T extends IZipNode> {
 			IZipNode[] ch = new IZipNode[node.children().length - 1];
 			System.arraycopy(node.children(), 0, ch, 0, index);
 			System.arraycopy(node.children(), index + 1, ch, index, node.children().length - index - 1);
-    		return new Loc<T>(new ZipNode<T>(node._node(), ch), context);
+    		return new Loc<T>(new ZipNode<T>(_source(), ch), context);
 		}
 		throw new ZipperException("Current node does not have any children or index out of bound!");
 	}
 	
 	public Loc<T> clear() {
 		if (!isLeaf()) {
-    		return new Loc<T>(new ZipNode<T>(node._node(), new IZipNode[0]), context);
+    		return new Loc<T>(new ZipNode<T>(_source(), new IZipNode[0]), context);
 		}
 		throw new ZipperException("Current node is a leaf!");
 	}
@@ -238,7 +242,7 @@ public final class Loc<T extends IZipNode> {
 			                             context.rightNodes().length];
 			System.arraycopy(context.leftNodes(), 0, ch, 0, context.leftNodes().length);
 			System.arraycopy(context.rightNodes(), 0, ch, context.leftNodes().length, context.rightNodes().length);
-			return new Loc<T>(new ZipNode<T>((T)context.getParentNode()._node(), ch), context.getParentContext());
+			return new Loc<T>(new ZipNode<T>((T)context.getParentNode()._source(), ch), context.getParentContext());
 		}
 		throw new ZipperException("Current node is already the top node!");
 	}

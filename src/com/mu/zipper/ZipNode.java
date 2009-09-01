@@ -25,7 +25,7 @@ public final class ZipNode<T extends IZipNode> implements IZipNode {
 		this.children = children;
 	}
 	
-	public T _node() {
+	public T _source() {
 		return node;
 	}
 	

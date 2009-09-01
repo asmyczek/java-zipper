@@ -2,7 +2,10 @@ package com.mu.zipper;
 
 import java.util.Collection;
 
-
+/**
+ * Zipepr constructor
+ *
+ */
 public final class Zipper {
 
 	/**
@@ -32,7 +35,7 @@ public final class Zipper {
 	public static <T extends IZipNode> T unzip(final IZipNode node) {
 		if (node instanceof ZipNode<?>) {
 			ZipNode<T> zipNode = (ZipNode<T>)node;
-			T source = zipNode._node();
+			T source = zipNode._source();
 			if (!zipNode.isLeaf()) {
 				Collection<T> ch = (Collection<T>)source.getChildren();
 				source.getChildren().clear();
