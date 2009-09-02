@@ -2,132 +2,98 @@ package com.mu.zipper.examples.zipstar;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import com.mu.zipper.IZipNode;
 import com.mu.zipper.Loc;
-import com.mu.zipper.ZipNode;
 import com.mu.zipper.Zipper;
 
 public final class ZipStar {
 
-	public final static Collection<Node> calcPath(final Graph graph, final Node from, final Node to) {
-		return new ZipStar(graph).calcPath(from, to);
+	public final static Path calcPath(final Graph graph, final Node from, final Node to) {
+		return new ZipStar(graph, from, to).calcPath();
 	}
-	
-	private final Map<Node, ZipStarNode> nodes;
 	
 	private final Graph graph;
 	
-	private ZipStar(final Graph graph) {
+	private final Node start;
+	
+	private final Node target;
+	
+	private final List<Node> activeNodes;
+	
+	private ZipStar(final Graph graph, final Node start, final Node target) {
 		super();
 		this.graph = graph;
-		nodes = new Hashtable<Node, ZipStarNode>();
-		for (Node node : graph.getNodes()) {
-			nodes.put(node, new ZipStarNode(node));
-		}
-	}
-	
-	private void removeNode(final ZipStarNode znode) {
-		nodes.remove(znode.node);
+		this.start = start;
+		this.target = target;
+		this.activeNodes = new ArrayList<Node>(graph.getNodes());
 	}
 	
 	private Collection<ZipStarNode> getChildren(final ZipStarNode node) {
-		List<ZipStarNode> result = new ArrayList<ZipStarNode>();
-		for (Node aNode : node.node.adjacentNodes()) {
-			ZipStarNode znode = nodes.get(aNode);
-			if (znode != null) {
-				result.add(znode);
+		List<ZipStarNode> children = new ArrayList<ZipStarNode>();
+		for (Node n : node.node.adjacentNodes()) {
+			if (activeNodes.contains(n)) {
+    			children.add(new ZipStarNode(n, n.directDistanceTo(target)));
 			}
 		}
-		return result;
+		return children;
 	}
 	
-	private double getWeight(ZipStarNode from, ZipStarNode to) {
-		return graph.getWeight(from.node, to.node);
-	}
-	
-	private Collection<Node> calcPath(final Node from, final Node to) {
-		ZipStarNode target = nodes.get(to);
-		Loc<ZipStarNode> loc = Zipper.<ZipStarNode>newZipper(nodes.get(from));
-		List<Loc<ZipStarNode>> paths = new ArrayList<Loc<ZipStarNode>>(); 
+	private Path calcPath() {
+		Comparator<Loc<ZipStarNode>> comparator = new Comparator<Loc<ZipStarNode>>() {
+			public int compare(Loc<ZipStarNode> o1, Loc<ZipStarNode> o2) {
+				return (int) Math.signum(o1._source().distance() - o2._source().distance());
+			}
+		};
+		SortedList<Loc<ZipStarNode>> paths = new SortedList<Loc<ZipStarNode>>(comparator);
+		paths.add(Zipper.<ZipStarNode>newZipper(new ZipStarNode(start, start.directDistanceTo(target))));
+		follow(paths);
 		
-		paths.add(loc);
-		removeNode(loc._source());
-		
-		Loc<ZipStarNode> path;
-		while ((path = nextNode(paths, target)) == null);
-			
-		System.out.println("Dist: " + path._source().distanceFromStart);
-		
-		List<Node> result = new ArrayList<Node>();
-		for (ZipNode<ZipStarNode> n : path.nodePath()) {
-			result.add(n._source().node);
+		if (!paths.isEmpty()) {
+			return new Path(paths.get(0));
 		}
-		return result;
+		throw new RuntimeException(String.format("No path exists from %1$s to %2$s", start, target));
 	}
 	
-	private Loc<ZipStarNode> nextNode(final List<Loc<ZipStarNode>> paths, final ZipStarNode target) {
-		Loc<ZipStarNode> nextNode = null;
-		Double minCost = null;
-		for(Iterator<Loc<ZipStarNode>> pi = paths.iterator(); pi.hasNext(); ) {
-			Loc<ZipStarNode> l = pi.next();
-			ZipStarNode lnode = l._source();
-			
-			// Remove from list if all children analyzed
-			List<ZipStarNode> znodes = new ArrayList<ZipStarNode>(l._source().getChildren());
-			if (znodes.isEmpty()) {
-				pi.remove();
-				continue;
-			}
-			
-			for (int i = 0; i < znodes.size(); i++) {
-    			ZipStarNode znode = znodes.get(i);
-    			double distFromStart = lnode.distanceFromStart + getWeight(lnode, znode);
-    			double cost = distFromStart + znode.directDistanceTo(target);
-				minCost = (minCost == null)? cost : Math.min(cost, minCost);
-				if (cost == minCost) {
-					nextNode = l.down(i);
-					nextNode._source().distanceFromStart = distFromStart;
-				}
-			}
-	    }
+	private void follow(SortedList<Loc<ZipStarNode>> paths) {
+		if (paths.isEmpty() || paths.getFirst()._source().node.equals(target)) return;
 		
-		if (target.equals(nextNode._source())) {
-			return nextNode;
-		} else if (nextNode != null) {
-			paths.add(nextNode);
-			removeNode(nextNode._source());
-		} else {
-			throw new IllegalArgumentException("No path between start and end node exists!");
+		Loc<ZipStarNode> first = paths.removeFirst();
+		activeNodes.remove(first._source().node);
+		
+		for (int i = 0 ; i < first.node().getChildren().size(); i++) {
+			Loc<ZipStarNode> down = first.down(i); 
+			down._source().distanceFromStart = first._source().distanceFromStart + 
+			    graph.getWeight(first._source().node, down._source().node);
+			paths.add(down);
 		}
 		
-		return null;
+	    follow(paths);
 	}
 	
-
-	private class ZipStarNode implements IZipNode {
+	class ZipStarNode implements IZipNode {
 
 		double distanceFromStart;
+		double distanceToTarget;
 		final Node node;
 		
-		public ZipStarNode(Node node) {
+		public ZipStarNode(Node node, double distanceToTarget) {
 			super();
 			this.node = node;
 			this.distanceFromStart = 0;
+			this.distanceToTarget = distanceToTarget;
 		}
 
-		public double directDistanceTo(final ZipStarNode to) {
-			return node.directDistanceTo(to.node);
+		public double distance() {
+			return distanceFromStart + distanceToTarget;
 		}
 		
 		public Collection<ZipStarNode> getChildren() {
 			return ZipStar.this.getChildren(this);
 		}
-		
+
 	}
 	
 }

@@ -1,7 +1,5 @@
 package com.mu.zipper.examples.zipstar;
 
-import java.util.Collection;
-
 import junit.framework.TestCase;
 
 import org.junit.Before;
@@ -50,8 +48,9 @@ public class ZipStarTest extends TestCase {
 		Node start = graph.getNodes().get(0);
 		Node end = graph.getNodes().get(4);
 		
-		Collection<Node> path = ZipStar.calcPath(graph, start, end);
-		for (Node n : path) {
+		Path path = ZipStar.calcPath(graph, start, end);
+		System.out.println("Dist: " + path.getDistance());
+		for (Node n : path.getPath()) {
 			System.out.println(n.getName());
 		}
 		

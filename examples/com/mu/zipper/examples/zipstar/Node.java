@@ -2,7 +2,6 @@ package com.mu.zipper.examples.zipstar;
 
 import java.util.Collection;
 
-
 public class Node {
 	
     private final Graph graph;
