@@ -56,7 +56,8 @@ public final class ZipNode<T extends IZipNode> implements IZipNode {
 	
 	private void init() {
 		if (children == NOT_INITIALIZED) {
-			children = (node.getChildren() == null)? null : node.getChildren().toArray(new IZipNode[0]);
+			Collection<? extends IZipNode> ch = node.getChildren();
+			children = (ch == null)? null : ch.toArray(new IZipNode[0]);
 		}
 	}
 

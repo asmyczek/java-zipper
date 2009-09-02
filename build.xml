@@ -5,6 +5,8 @@
     <property name="jdk" value="1.5"/>
     <property name="debuglevel" value="source,lines"/>
     <property name="junit" value="junit"/>
+    <property name="zipper-lib" value="zipper.jar"/>
+    <property name="zipper-src-lib" value="zipper-src.jar"/>
 
     <path id="classpath">
         <pathelement location="bin"/>
@@ -14,6 +16,8 @@
 	<target name="clean">
         <delete dir="bin"/>
         <delete dir="${junit}"/>
+        <delete file="${zipper-lib}"/>
+        <delete file="${zipper-src-lib}"/>
 	</target>
 
     <target name="init" depends="clean">
@@ -27,7 +31,14 @@
         </javac>
 	</target>
 
-    <target name="build-test" depends="build-zipper">
+    <target name="build-examples" depends="build-zipper">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${jdk}" target="${jdk}">
+			<classpath refid="classpath"/>
+            <src path="examples"/>
+        </javac>
+	</target>
+
+    <target name="build-test" depends="build-zipper, build-examples">
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${jdk}" target="${jdk}">
 			<classpath refid="classpath"/>
             <src path="test"/>
@@ -35,12 +46,20 @@
 	</target>
 
     <target name="jars" depends="build-zipper">
-		<jar destfile="zipper.jar" basedir="bin">
+		<jar destfile="${zipper-lib}">
+			<fileset dir="bin"/>
+			<fileset dir="." includes="LICENSE.txt"/>
 			<manifest>
-				<attribute name="Version" value="0.1"/>
+				<attribute name="Vendor" value="Mu Dynamics."/>
+				<attribute name="Library" value="Zipper"/>
+				<attribute name="Version" value="1.0"/>
 			</manifest>
 		</jar>
-		<jar destfile="zipper-src.jar" basedir="src"/>
+		<jar destfile="${zipper-src-lib}">
+			<fileset dir="src"/>
+			<fileset dir="examples"/>
+			<fileset dir="." includes="LICENSE.txt"/>
+		</jar>
 	</target>
 
 	<target name="build" depends="build-zipper"/>
@@ -53,6 +72,8 @@
             <formatter type="xml"/>
             <classpath refid="classpath"/>
             <test name="com.mu.zipper.ZipperTest" todir="${junit}"/>
+            <test name="com.mu.zipper.examples.zipstar.SortedListTest" todir="${junit}"/>
+            <test name="com.mu.zipper.examples.zipstar.ZipStarTest" todir="${junit}"/>
         </junit>
     </target>
 
