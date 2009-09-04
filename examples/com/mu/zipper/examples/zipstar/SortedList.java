@@ -8,33 +8,56 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * A simple SortedList implementation.
+ * 
+ * @param <E> element type
+ * 
+ * @author Adam Smyczek
+ */
 public class SortedList<E> implements List<E> {
 
 	private final Comparator<E> comparator;
 	
 	private final LinkedList<E> delegate = new LinkedList<E>();
 	
+	/**
+	 * The constructor takes a comparator used
+	 * for element insertion. See <tt>add()</tt> method.
+	 * 
+	 * @param comparator
+	 */
 	public SortedList(Comparator<E> comparator) {
 		super();
 		if (comparator == null) throw new IllegalArgumentException("Comparator is null!");
 		this.comparator = comparator;
 	}
 
+	/**
+	 * Inserts new element in the order defined by <tt>comparator</tt>.
+	 * 
+	 * @param o the object to insert
+	 */
 	public boolean add(E o) {
         int idx = Collections.binarySearch(delegate, o, comparator);
-        if (idx < 0) {
-            delegate.add(-idx - 1, o);
-        } else {
-            delegate.add(idx + 1, o);
-        }
+        delegate.add((int)Math.signum(idx) * (idx + 1), o);
         return true;
 	}
 
+	/**
+	 * Inserts all elements in the order defined by <tt>comparator</tt>.
+	 * 
+	 * @param c
+	 * @return true
+	 */
 	public boolean add(E... c) {
 		for (E e : c) add(e);
 		return true;
 	}
 	
+	/**
+	 * Same as <tt>add(E... c)</tt>, but for collections.
+	 */
 	public boolean addAll(Collection<? extends E> c) {
 		for (E e : c) add(e);
 		return true;

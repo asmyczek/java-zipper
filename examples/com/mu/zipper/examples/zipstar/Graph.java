@@ -3,12 +3,24 @@ package com.mu.zipper.examples.zipstar;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Graph {
+/**
+ * A simple graph implementation.
+ * The graph contains a list of nodes and 
+ * directional edges. All nodes are named 
+ * and have a 2D coordinate. The edges are
+ * weighted.
+ * Nodes and edges are created using constructor 
+ * methods <tt>newNode()</tt>, <tt>connect()</tt>
+ * and <tt>direct()</tt>.
+ * 
+ * @author Adam Smyczek
+ */
+public final class Graph {
 
 	private final List<Node> nodes;
 	private final Map<Object, Edge> edges;
@@ -16,34 +28,56 @@ public class Graph {
 	public Graph() {
 		super();
 		this.nodes = new ArrayList<Node>();
-		this.edges = new HashMap<Object, Edge>();
+		this.edges = new Hashtable<Object, Edge>();
 	}
 
-	public List<Node> getNodes() {
-		return Collections.unmodifiableList(nodes);
-	}
-
-	public Collection<Edge> getEdges() {
-		return Collections.unmodifiableCollection(edges.values());
-	}
-	
-	public List<Node> adjacentNodesFrom(final Node from) {
-		List<Node> result = new ArrayList<Node>();
-		for (Iterator<Edge> i = edges.values().iterator(); i.hasNext(); ) {
-			Edge e = i.next();
-			if (e.getFrom().equals(from)) {
-				result.add(e.getTo());
-			}
-		}
-		return result;
-	}
-	
+	/**
+	 * Create a new node associated with this graph.
+	 * 
+	 * @param name the name of the node
+	 * @param coordX x coordinate
+	 * @param coordY y coordinate
+	 * @return a new node
+	 */
 	public Node newNode(final String name, double coordX, double coordY) {
 		Node node = new Node(this, name, coordX, coordY);
 		nodes.add(node);
 		return node;
 	}
 	
+	/**
+	 * Creates two edges <tt>n1->n2</tt> and <tt>n2->n1</tt>, both with 
+	 * the weight <tt>weight</tt>.
+	 * 
+	 * @param n1 node 1
+	 * @param n2 node 2
+	 * @param weight the edge weight/cost
+	 */
+	public void connect(final Node n1, final Node n2, double weight) {
+		assert(nodes.contains(n1));
+		assert(nodes.contains(n2));
+		edges.put(new Key(n1, n2), new Edge(n1, n2, weight));
+		edges.put(new Key(n2, n1),new Edge(n2, n1, weight));
+	}
+	
+	/**
+	 * Create one directional edge <tt>n1->n2</tt>.
+	 * 
+	 * @param n1 node 1
+	 * @param n2 node 2
+	 * @param weight the weight/cost of the edge
+	 */
+	public void direct(final Node n1, final Node n2, double weight) {
+		assert(nodes.contains(n1));
+		assert(nodes.contains(n2));
+		edges.put(new Key(n1, n2), new Edge(n1, n2, weight));
+	}
+	
+	/**
+	 * Removes the node and all adjacent edges from the graph.
+	 * 
+	 * @param node to remove
+	 */
 	public void removeNode(final Node node) {
 		nodes.remove(node);
 		for (Iterator<Edge> i = edges.values().iterator(); i.hasNext(); ) {
@@ -54,28 +88,56 @@ public class Graph {
 		}
 	}
 	
-	public void connect(final Node n1, final Node n2, double weight) {
-		assert(nodes.contains(n1));
-		assert(nodes.contains(n2));
-		edges.put(new Key(n1, n2), new Edge(n1, n2, weight));
-		edges.put(new Key(n2, n1),new Edge(n2, n1, weight));
-	}
-	
-	public void direct(final Node n1, final Node n2, double weight) {
-		assert(nodes.contains(n1));
-		assert(nodes.contains(n2));
-		edges.put(new Key(n1, n2), new Edge(n1, n2, weight));
-	}
-	
+	/**
+	 * Remove all edges between nodes n1 and n2.
+	 * 
+	 * @param n1
+	 * @param n2
+	 */
 	public void disconnect(final Node n1, final Node n2) {
 		edges.remove(new Key(n1, n2));
 		edges.remove(new Key(n2, n1));
 	}
 	
+	// ---- Accessors ----
+	
+	public List<Node> getNodes() {
+		return Collections.unmodifiableList(nodes);
+	}
+
+	public Collection<Edge> getEdges() {
+		return Collections.unmodifiableCollection(edges.values());
+	}
+	
+	/**
+	 * Returns all reachable nodes from the <tt>from</tt> node.
+	 * 
+	 * @param from node
+	 * @return list of all reachable nodes
+	 */
+	public List<Node> adjacentNodesFrom(final Node from) {
+		List<Node> nodes = new ArrayList<Node>();
+		for (Iterator<Edge> i = edges.values().iterator(); i.hasNext(); ) {
+			Edge e = i.next();
+			if (e.from.equals(from)) {
+				nodes.add(e.to);
+			}
+		}
+		return Collections.unmodifiableList(nodes);
+	}
+	
+	/**
+	 * Edge weight/cost of the edge <tt>from->to</tt>.
+	 * 
+	 * @param from node
+	 * @param to node
+	 * @return the weight/cost
+	 * @throws IllegalStateException from to nodes are not direct connected.
+	 */
 	public double getWeight(Node from, Node to) {
 		Edge e = edges.get(new Key(from, to));
 		if (e != null) {
-			return e.getWeight();
+			return e.weight;
 		}
 		throw new IllegalStateException("No edge from " + from.getName() + " to " + to.getName() + " exists.");
 	}
@@ -89,7 +151,11 @@ public class Graph {
 		return buf.toString();
 	}
 	
-	class Edge {
+	
+	/**
+	 * Internal edge class.
+	 */
+	private class Edge {
 		
 		private final Node from;
 		private final Node to;
@@ -102,20 +168,11 @@ public class Graph {
 			this.weight = weight;
 		}
 		
-		public Node getFrom() {
-			return from;
-		}
-
-		public Node getTo() {
-			return to;
-		}
-
-		public double getWeight() {
-			return weight;
-		}
-
 	}
 	
+	/**
+	 * Hashtable key for edge objects.
+	 */
 	private class Key {
 		
 		private final Node from;

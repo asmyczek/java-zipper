@@ -2,44 +2,47 @@
 
 <project name="java-zipper" basedir="." default="jars">
 
+    <property name="bin.dir" value="bin"/>
+    <property name="docs.dir" value="docs"/>
+    <property name="junit.dir" value="junit"/>
     <property name="jdk" value="1.5"/>
     <property name="debuglevel" value="source,lines"/>
-    <property name="junit" value="junit"/>
     <property name="zipper-lib" value="zipper.jar"/>
     <property name="zipper-src-lib" value="zipper-src.jar"/>
 
     <path id="classpath">
-        <pathelement location="bin"/>
+		<pathelement location="${bin.dir}"/>
         <pathelement location="lib/junit-4.7.jar"/>
     </path>
 
 	<target name="clean">
-        <delete dir="bin"/>
-        <delete dir="${junit}"/>
+		<delete dir="${bin.dir}"/>
+		<delete dir="${docs}"/>
+        <delete dir="${junit.dir}"/>
         <delete file="${zipper-lib}"/>
         <delete file="${zipper-src-lib}"/>
 	</target>
 
     <target name="init" depends="clean">
-        <mkdir dir="bin"/>
+		<mkdir dir="${bin.dir}"/>
     </target>
 
     <target name="build-zipper" depends="init">
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${jdk}" target="${jdk}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${bin.dir}" source="${jdk}" target="${jdk}">
 			<classpath refid="classpath"/>
             <src path="src"/>
         </javac>
 	</target>
 
     <target name="build-examples" depends="build-zipper">
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${jdk}" target="${jdk}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${bin.dir}" source="${jdk}" target="${jdk}">
 			<classpath refid="classpath"/>
             <src path="examples"/>
         </javac>
 	</target>
 
     <target name="build-test" depends="build-zipper, build-examples">
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${jdk}" target="${jdk}">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${bin.dir}" source="${jdk}" target="${jdk}">
 			<classpath refid="classpath"/>
             <src path="test"/>
         </javac>
@@ -47,7 +50,7 @@
 
     <target name="jars" depends="build-zipper">
 		<jar destfile="${zipper-lib}">
-			<fileset dir="bin"/>
+			<fileset dir="${bin.dir}"/>
 			<fileset dir="." includes="LICENSE.txt"/>
 			<manifest>
 				<attribute name="Vendor" value="Mu Dynamics."/>
@@ -67,24 +70,43 @@
 	<target name="build-all" depends="build-test"/>
 
     <target name="test" depends="build-test">
-        <mkdir dir="${junit}"/>
+        <mkdir dir="${junit.dir}"/>
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="xml"/>
             <classpath refid="classpath"/>
-            <test name="com.mu.zipper.ZipperTest" todir="${junit}"/>
-            <test name="com.mu.zipper.examples.zipstar.SortedListTest" todir="${junit}"/>
-            <test name="com.mu.zipper.examples.zipstar.ZipStarTest" todir="${junit}"/>
+            <test name="com.mu.zipper.ZipperTest" todir="${junit.dir}"/>
+            <test name="com.mu.zipper.examples.zipstar.SortedListTest" todir="${junit.dir}"/>
+            <test name="com.mu.zipper.examples.zipstar.GraphFactoryTest" todir="${junit.dir}"/>
+            <test name="com.mu.zipper.examples.zipstar.ZipStarTest" todir="${junit.dir}"/>
         </junit>
     </target>
 
     <target name="test.report">
-        <junitreport todir="${junit}">
-            <fileset dir="${junit}">
+        <junitreport todir="${junit.dir}">
+            <fileset dir="${junit.dir}">
                 <include name="TEST-*.xml"/>
             </fileset>
-            <report format="frames" todir="${junit}"/>
+            <report format="frames" todir="${junit.dir}"/>
         </junitreport>
     </target>
+
+	<target name="javadoc">
+		<javadoc
+			destdir="${docs.dir}/api"
+			author="true"
+			use="true"
+			windowtitle="Zipper API">
+
+			<packageset dir="src" defaultexcludes="yes"/>
+			<packageset dir="examples" defaultexcludes="yes"/>
+
+			<doctitle><![CDATA[<h1>Zipper</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Copyright &#169; 2009 Mu Dynamics.</i>]]></bottom>
+			<tag name="todo" scope="all" description="To do:"/>
+			<link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="C:\tmp"/>
+			<link href="http://developer.java.sun.com/developer/products/xml/docs/api/"/>
+		</javadoc>
+	</target>
 
 </project>
 

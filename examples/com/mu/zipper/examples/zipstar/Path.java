@@ -8,15 +8,23 @@ import com.mu.zipper.Loc;
 import com.mu.zipper.ZipNode;
 import com.mu.zipper.examples.zipstar.ZipStar.ZipStarNode;
 
-public class Path {
+/**
+ * ZipStar result object.
+ * 
+ * @author Adam Smyczek
+ */
+public final class Path {
 
 	private final Loc<ZipStarNode> loc;
 
-	public Path(Loc<ZipStarNode> loc) {
+	protected Path(Loc<ZipStarNode> loc) {
 		super();
 		this.loc = loc;
 	}
 	
+	/**
+	 * @return the node path from start to target.
+	 */
 	public Collection<Node> getPath() {
     	List<Node> result = new ArrayList<Node>();
     	for (ZipNode<ZipStarNode> n : loc.nodePath()) {
@@ -25,6 +33,9 @@ public class Path {
     	return result;
 	}
 	
+	/**
+	 * @return distance/cost from start node to target node.
+	 */
 	public double getDistance() {
 		return loc._source().distanceFromStart;
 	}
