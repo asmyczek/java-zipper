@@ -3,6 +3,7 @@ package com.mu.zipper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -63,6 +64,30 @@ public final class Loc<T extends IZipNode> {
 	
 	public boolean hasChildren() {
 		return node.hasChildren();
+	}
+	
+	public Iterator<T> childrenIterator() {
+		if (!isLeaf()) {
+    		final Iterator<? extends IZipNode> iter = node.getChildren().iterator();
+    		return new Iterator<T>() {
+    
+    			public boolean hasNext() {
+    				return iter.hasNext();
+    			}
+    
+    			@SuppressWarnings("unchecked")
+				public T next() {
+    				IZipNode node = iter.next();
+    				return (node instanceof ZipNode<?>)? ((ZipNode<T>)node)._source() : (T)node;
+    			}
+    
+    			public void remove() {
+    				throw new UnsupportedOperationException();
+    			}
+    			
+    		};
+		}
+		throw new ZipperException("This node is a leaf node!");
 	}
 	
 	public boolean isLeaf() {

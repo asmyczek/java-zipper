@@ -4,8 +4,11 @@ import java.util.Comparator;
 
 import junit.framework.TestCase;
 
+import org.junit.Test;
+
 public class SortedListTest extends TestCase {
 
+	@Test
 	public void testSortedList() {
 		
 		Comparator<String> comparator = new Comparator<String>() {

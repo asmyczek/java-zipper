@@ -103,6 +103,16 @@ public class ZipperTest extends TestCase {
 	}
 	
 	@Test
+	public void testChildrenIterator() {
+		Loc<Node> r = root.next().right().root();
+		Iterator<Node> iter = r.childrenIterator();
+		assertEquals("a1", iter.next().getName());
+		assertEquals("a2", iter.next().getName());
+		assertEquals("a3", iter.next().getName());
+		assertFalse(iter.hasNext());
+	}
+	
+	@Test
 	public void testInsert() {
 		Loc<Node> a2 = root.down(1);
 
