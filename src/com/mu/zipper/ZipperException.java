@@ -1,7 +1,9 @@
 package com.mu.zipper;
 
 /**
- * General Zipper exception
+ * General Zipper exception.
+ * 
+ * @author Adam Smyczek
  */
 public class ZipperException extends RuntimeException {
 

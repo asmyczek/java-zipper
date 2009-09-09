@@ -3,36 +3,43 @@ package com.mu.zipper;
 import java.util.Collection;
 
 /**
- * Zipepr constructor
- *
+ * Zipper constructor and util functions.
+ * 
+ * @author Adam Smyczek
  */
 public final class Zipper {
 
 	/**
-	 * Create a zipper from a IZipNode tree
-	 * @param <T> IZipNode type
-	 * @param node
-	 * @return zipper root location
+	 * Zips the <tt>node</tt> and returns the Zipper
+	 * location for this node.
+	 * 
+	 * @param <T> concrete IZipNode type
+	 * @param node root node of the tree
+	 * @return Zipper root location
 	 */
-	public static <T extends IZipNode> Loc<T> newZipper(final T node) {
+	public static <T extends IZipNode> Loc<T> zip(final T node) {
 		return new Loc<T>(new ZipNode<T>(node), Context.TOP);
-	}
-
-	public static <T extends IZipNode> Loc<T> unfold(final Loc<T> node) {
-		Loc<T> l = node.root();
-		while (!l.isEnd()) {
-			l = l.next();
-		}
-		return l.root();
 	}
 	
 	/**
-	 * @param <T>
-	 * @param node
-	 * @return
+	 * Opposite to zip, <tt>unzip</tt> re-creates the 
+	 * tree from the Zipper data structure.
+	 * 
+	 * @param <T> concrete note type
+	 * @param location a location in the tree
+	 * @return the unzipped tree
+	 */
+	public static <T extends IZipNode> T unzip(final Loc<T> location) {
+		return Zipper.<T>unzip(location.root().node());
+	}
+	
+	/**
+	 * Recursive <tt>unzip</tt> call to all children nodes. The children
+	 * of every original source node are replaced with the 
+	 * children of the corresponding ZipNode.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends IZipNode> T unzip(final IZipNode node) {
+	private static <T extends IZipNode> T unzip(final IZipNode node) {
 		if (node instanceof ZipNode<?>) {
 			ZipNode<T> zipNode = (ZipNode<T>)node;
 			T source = zipNode._source();
@@ -50,12 +57,25 @@ public final class Zipper {
 	}
 	
 	/**
+	 * Traverses the entire tree and wraps every tree node into
+	 * a ZipNode. Usually a call to <tt>Loc#node()#getChildren()</tt>
+	 * will return a mixed collection of T and ZipNode nodes, depending
+	 * on if a node was already traversed or not. Calling this function 
+	 * first will guarantee that the call to <tt>getChildren()</tt>
+	 * returns ZipNode objects only. This method is expensive, before
+	 * you decide to use it, take a look at <tt>Loc#childrenIterator()</tt>.
+	 * 
 	 * @param <T>
-	 * @param location
-	 * @return
+	 * @param node
+	 * @return location to a root node where every tree node
+	 *         is a ZipNode
 	 */
-	public static <T extends IZipNode> T unzip(final Loc<T> location) {
-		return Zipper.<T>unzip(location.node());
+	public static <T extends IZipNode> Loc<T> unfold(final Loc<T> node) {
+		Loc<T> l = node.root();
+		while (!l.isEnd()) {
+			l = l.next();
+		}
+		return l.root();
 	}
 	
 }

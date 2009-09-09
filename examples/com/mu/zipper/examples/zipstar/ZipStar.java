@@ -87,7 +87,7 @@ public final class ZipStar {
 		SortedList<Loc<ZipStarNode>> paths = new SortedList<Loc<ZipStarNode>>(distance_plus_cost_comparator);
 		
 		// Start location from the start node
-		Loc<ZipStarNode> startLoc = Zipper.<ZipStarNode>newZipper(new ZipStarNode(start, start.directDistanceTo(target)));
+		Loc<ZipStarNode> startLoc = Zipper.<ZipStarNode>zip(new ZipStarNode(start, start.directDistanceTo(target)));
 		paths.add(startLoc);
 		
 		// Calculate possible best-first paths recursively

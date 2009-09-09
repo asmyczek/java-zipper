@@ -31,7 +31,7 @@ public class ZipperTest extends TestCase {
 		Node a2 = new Node("a2", c1, c2);
 		Node a3 = new Node("a3", false);
 		
-		root = Zipper.newZipper(new Node("root", a1, a2, a3));
+		root = Zipper.zip(new Node("root", a1, a2, a3));
 	}
 
 	@Test
@@ -250,7 +250,7 @@ public class ZipperTest extends TestCase {
 	public static String printTree(IZipNode node) {
 		StringBuffer buf = new StringBuffer();
 		buf.append(node.toString());
-		if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+		if (node.getChildren() != null) {
 			buf.append(":[");
 			for (IZipNode n : node.getChildren()) {
 				buf.append(printTree(n));
