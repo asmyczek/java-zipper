@@ -17,10 +17,11 @@ Just build with `ant` and copy the resulting `zipper.jar` file into your class p
 Let us start with a simple `Node` and `Leaf` class:
 
 <pre>
+	// Node
     public class Node implements IZipNode {
     
       private String name;
-      private final List<Node> children;
+      private final List&lt;Node&gt; children;
     
       public Node(final String name, final Node... children) {
         super();
@@ -36,12 +37,13 @@ Let us start with a simple `Node` and `Leaf` class:
         return name;
       }
     
-      public Collection<Node> getChildren() {
+      public Collection&lt;Node&gt; getChildren() {
         return this.children;
       }
     
     }
     
+	// Leaf
     public class Leaf extends Node {
     
       public Leaf(final String name) {
@@ -49,7 +51,7 @@ Let us start with a simple `Node` and `Leaf` class:
       }
     
       @Override
-      public Collection<Node> getChildren() {
+      public Collection&lt;Node&gt; getChildren() {
         return null;
       }
     
@@ -84,7 +86,7 @@ Using these classes we can create a sample tree:
 and zip it as following:
 
 <pre>
-    Loc<Node> root = Zipper.zip(tree);
+    Loc&lt;Node&gt; root = Zipper.zip(tree);
 </pre>
 
 The `Zipper` constructor `zip()` creates a location `Loc` object that references the root node.
@@ -93,13 +95,13 @@ Let us do some moves and updates now:
 
 <pre>
     // Move to node 'e';
-    Loc<Node> e = root.down().right().down();
+    Loc&lt;Node&gt; e = root.down().right().down();
     
     // Add a sibling on the right
-    Loc<Node> f = e.insertRight(new Leaf("f"));
+    Loc&lt;Node&gt; f = e.insertRight(new Leaf("f"));
     
     // Move up and add a sibling on the left
-    Loc<Node> g = f.up().insertLeft(new Leaf("g"));
+    Loc&lt;Node&gt; g = f.up().insertLeft(new Leaf("g"));
 </pre>
 
 Every move returns a new location object. Since tree changes remain local to a location, the resulting trees build from locations `e.root()`, `f.root()' and `g.root()` look like following (using `Main` class `printTree()` method from getting started examples):
