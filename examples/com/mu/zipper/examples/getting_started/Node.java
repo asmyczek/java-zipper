@@ -6,14 +6,27 @@ import java.util.List;
 
 import com.mu.zipper.IZipNode;
 
+/**
+ * A sample node.
+ * 
+ * @author Adam Smyczek
+ */
 public class Node implements IZipNode {
 
 	private String name;
 	
 	private final List<Node> children;
 	
+	/**
+	 * @param name node name
+	 * @param children children list, not null
+	 */
 	public Node(final String name, final Node... children) {
 		super();
+		
+		assert(name != null);
+		assert(children != null);
+		
 		this.name = name;
 		this.children = Arrays.asList(children);
 	}

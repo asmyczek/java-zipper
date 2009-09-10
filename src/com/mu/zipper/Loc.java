@@ -16,7 +16,7 @@ import java.util.List;
  * another using the basic <tt>down()</tt>, <tt>left()</tt>, 
  * <tt>right()</tt> and <tt>up()</tt> methods. Every move 
  * operation returns a new location instance. 
- * Changes to the tree are possible only at the the
+ * Changes to the tree are possible only at the
  * node in currently focused location.
  * 
  * A location can be seen as a view into the tree.
